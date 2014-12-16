@@ -1,28 +1,38 @@
 'use strict';
+var jsondiffpatch = require('jsondiffpatch');
+var lodash = require('lodash');
 
-var jsondiffpatch = require('jsondiffpatch').create();
-var diff = jsondiffpatch.diff;
+module.exports = function(schema, opts) {
+	opts = opts || {};
+	var defaultOpts = {
+		objectHash: function(obj) {
+			return obj._id || obj.id;
+		},
+		arrays: {
+			detectMove: true,
+			includeValueOnMove: false
+		},
+		textDiff: {
+			minLength: 60
+		}
+	};
 
-module.exports = function(schema) {
+	var jdp = jsondiffpatch.create(lodash.merge(defaultOpts, opts));
+
 	// Post-init hook stores original
 	schema.post('init', function() {
 		this._original = this.toObject();
 	});
 
 	// Post-validate runs before pre-save
-	schema.post('validate', function() {
+	schema.pre('save', function(next) {
 		// Check that _original is set
 		if (!this._original) {
-			return;
-		}
-
-		// Check for listeners
-		var listeners = this.listeners('diff');
-		if (!listeners.length) {
-			return;
+			return next();
 		}
 
 		// Perform diff
-		this._diff = diff(this._original, this.toObject());
+		this._diff = jdp.diff(this._original, this.toObject());
+		next();
 	});
 };

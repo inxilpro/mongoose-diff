@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/inxilpro/mongoose-diff",
   "dependencies": {
-    "jsondiffpatch": "^0.1.25"
+    "jsondiffpatch": "^0.1.25",
+    "lodash": "^2.4.1"
   }
 }
