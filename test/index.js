@@ -39,7 +39,7 @@ function newDoc() {
 // Run tests
 describe('A new document', function() {
 	var running = false;
-	before(function(done) {
+	beforeEach(function(done) {
 		if (!running) {
 			return done();
 		}
@@ -49,6 +49,12 @@ describe('A new document', function() {
 				done();
 			}
 		}, 100);
+	});
+
+	after(function(done) {
+		PersonModel.remove(function(err) {
+			done();
+		});
 	});
 
 	// Make sure diff doesn't exist on first save
