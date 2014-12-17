@@ -36,4 +36,8 @@ module.exports = function(schema, opts) {
 		this._diff = jdp.diff(this._original, this.toObject());
 		next();
 	});
+
+	schema.post('save', function() {
+		this._original = this.toObject();
+	});
 };

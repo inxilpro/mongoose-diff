@@ -1,7 +1,6 @@
 'use strict';
 
 var assert = require('assert');
-var async = require('async');
 var mongoose = require('mongoose');
 var connection = mongoose.createConnection('mongodb://localhost/mongoose-diff-test');
 var personSchema = new mongoose.Schema({
@@ -19,6 +18,8 @@ var preSave;
 personSchema.pre('save', function(next) {
 	if (preSave) {
 		preSave.call(this, next);
+	} else {
+		next();
 	}
 });
 
@@ -37,46 +38,65 @@ function newDoc() {
 
 // Run tests
 describe('A new document', function() {
-	async.series([
-		function(cb) {
-			// Make sure diff doesn't exist on first save
-			it('should not have a _diff on initial save', function(done) {
-				var doc = newDoc();
-				preSave = function(next) {
-					assert(!this._diff);
-					next();
-					cb();
-					done();
-				};
-				doc.save();
-			})
-		},
-
-		function(cb) {
-			// Check diff on subsequent saves
-			it('should have a _diff on non-first save', function(done) {
-				var doc = newDoc();
-
-				preSave = null;
-
-				doc.save(function(err) {
-					assert(!err);
-
-					doc.name = 'Jim Stevens';
-					doc.age = 31;
-					doc.nicknames = [];
-					doc.isAdmin = false;
-
-					preSave = function(next) {
-						console.log(this._diff);
-						next();
-						cb();
-						done();
-					};
-
-					doc.save();
-				});
-			})
+	var running = false;
+	before(function(done) {
+		if (!running) {
+			return done();
 		}
-	]);
+		var i = setInterval(function() {
+			if (!running) {
+				clearInterval(i);
+				done();
+			}
+		}, 100);
+	});
+
+	// Make sure diff doesn't exist on first save
+	it('should not have a _diff on initial save', function(done) {
+		running = true;
+		var doc = newDoc();
+		preSave = function(next) {
+			assert(!this._diff);
+			next();
+			done();
+			running = false;
+		};
+		doc.save();
+	});
+
+	// Check diff on subsequent saves
+	it('should have a _diff on non-first save', function(done) {
+		running = true;
+		var doc = newDoc();
+
+		preSave = null;
+
+		doc.save(function(err) {
+			assert(!err);
+
+			doc.name = 'Jim Stevens';
+			doc.age = 31;
+			doc.nicknames = [];
+			doc.isAdmin = false;
+
+			preSave = function(next) {
+				var expected = {
+					name: ['John Smith', 'Jim Stevens'],
+					age: [32, 31],
+					isAdmin: [true, false],
+					nicknames: {
+						_t: 'a',
+						_0: ['Johnny Boy', 0, 0],
+						_1: ['Smith-o', 0, 0 ]
+					}
+				};
+				assert.deepEqual(expected, this._diff);
+				next();
+				done();
+				running = false;
+			};
+
+			doc.save();
+		});
+	});
 });
