@@ -1,5 +1,7 @@
 # Mongoose "Diff" Plugin
 
+[![Build Status](https://travis-ci.org/inxilpro/mongoose-diff.svg?branch=master)](https://travis-ci.org/inxilpro/mongoose-diff)
+
 This is a simple plugin to expose changes during the pre-save hooks.
 
 ## Installation
