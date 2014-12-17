@@ -1,4 +1,5 @@
 'use strict';
+
 var jsondiffpatch = require('jsondiffpatch');
 var lodash = require('lodash');
 
