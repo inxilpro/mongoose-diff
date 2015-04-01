@@ -25,17 +25,14 @@ module.exports = function(schema, opts) {
 		this._original = this.toObject();
 	});
 
-	// Post-validate runs before pre-save
-	schema.pre('save', function(next) {
-		// Check that _original is set
-		if (!this._original) {
-			return next();
-		}
+    schema.virtual('_diff').get(function() {
+        // Check that _original is set
+        if (!this._original) {
+            return undefined;
+        }
 
-		// Perform diff
-		this._diff = jdp.diff(this._original, this.toObject());
-		next();
-	});
+        return jdp.diff(this._original, this.toObject());
+    });
 
 	schema.post('save', function() {
 		this._original = this.toObject();
