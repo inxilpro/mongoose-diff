@@ -27,8 +27,9 @@ module.exports = function(schema, opts) {
 
     schema.virtual('_diff').get(function() {
         // Check that _original is set
+        // In case of new Schema(), post init is not called
         if (!this._original) {
-            return undefined;
+            this._original = {};
         }
 
         return jdp.diff(this._original, this.toObject());
