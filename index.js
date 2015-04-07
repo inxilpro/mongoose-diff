@@ -22,7 +22,7 @@ module.exports = function(schema, opts) {
 
 	// Post-init hook stores original
 	schema.post('init', function() {
-		this._original = this.toObject();
+		this._original = this.toObject({transform: false});
 	});
 
     schema.virtual('_diff').get(function() {
@@ -32,10 +32,10 @@ module.exports = function(schema, opts) {
             this._original = {};
         }
 
-        return jdp.diff(this._original, this.toObject());
+        return jdp.diff(this._original, this.toObject({transform: false}));
     });
 
 	schema.post('save', function() {
-		this._original = this.toObject();
+		this._original = this.toObject({transform: false});
 	});
 };
