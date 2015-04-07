@@ -22,22 +22,20 @@ module.exports = function(schema, opts) {
 
 	// Post-init hook stores original
 	schema.post('init', function() {
-		this._original = this.toObject();
+		this._original = this.toObject({transform: false});
 	});
 
-	// Post-validate runs before pre-save
-	schema.pre('save', function(next) {
-		// Check that _original is set
-		if (!this._original) {
-			return next();
-		}
+    schema.virtual('_diff').get(function() {
+        // Check that _original is set
+        // In case of new Schema(), post init is not called
+        if (!this._original) {
+            this._original = {};
+        }
 
-		// Perform diff
-		this._diff = jdp.diff(this._original, this.toObject());
-		next();
-	});
+        return jdp.diff(this._original, this.toObject({transform: false}));
+    });
 
 	schema.post('save', function() {
-		this._original = this.toObject();
+		this._original = this.toObject({transform: false});
 	});
 };
