@@ -2,6 +2,8 @@
 
 var assert = require('assert');
 var mongoose = require('mongoose');
+var mockgoose = require('mockgoose');
+mockgoose(mongoose);
 var connection = mongoose.createConnection('mongodb://localhost/mongoose-diff-test');
 var personSchema = new mongoose.Schema({
 	name: String,
