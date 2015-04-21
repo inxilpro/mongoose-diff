@@ -1,6 +1,6 @@
 {
   "name": "mongoose-diff",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Diffing plugin for mongoose documents",
   "main": "index.js",
   "scripts": {
@@ -21,11 +21,12 @@
   },
   "homepage": "https://github.com/inxilpro/mongoose-diff",
   "dependencies": {
-    "jsondiffpatch": "^0.1.25",
-    "lodash": "^2.4.1"
+    "jsondiffpatch": "^0.1.31",
+    "lodash": "^3.7.0"
   },
   "devDependencies": {
-    "mocha": "^2.0.1",
-    "mongoose": "^3.8.20"
+    "mocha": "^2.2.4",
+    "mockgoose": "^2.0.1",
+    "mongoose": "^4.0.1"
   }
 }

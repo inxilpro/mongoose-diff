@@ -26,6 +26,15 @@ schema.pre('save', function(next) {
 
 ## Change Log
 
+### 0.2.0
+  - Merged lchenay's pull request #1:
+      - Use a `virtual` instead of an object property
+      - Don't apply transformations during toObject() calls
+  - Updated dependencies
+  - Added additional testing
+  - Refactored code slightly
+  - Exposed a `virtualName` option to change the virtual name from `_diff` to whatever you want
+
 ### 0.1.0
   - Initial release
 

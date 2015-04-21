@@ -4,8 +4,9 @@ var jsondiffpatch = require('jsondiffpatch');
 var lodash = require('lodash');
 
 module.exports = function(schema, opts) {
-	opts = opts || {};
+	// Set up default options
 	var defaultOpts = {
+		virtualName: '_diff',
 		objectHash: function(obj) {
 			return obj._id || obj.id;
 		},
@@ -18,24 +19,33 @@ module.exports = function(schema, opts) {
 		}
 	};
 
-	var jdp = jsondiffpatch.create(lodash.merge(defaultOpts, opts));
+	// Merge options
+	opts = opts || {};
+	opts = lodash.merge(defaultOpts, opts);
 
-	// Post-init hook stores original
-	schema.post('init', function() {
-		this._original = this.toObject({transform: false});
-	});
+	// Extract local options...
+	var virtualName = opts.virtualName;
+	delete opts.virtualName;
 
-    schema.virtual('_diff').get(function() {
-        // Check that _original is set
-        // In case of new Schema(), post init is not called
+	// ...and pass the rest to jdp
+	var jdp = jsondiffpatch.create(opts);
+
+	// Post-init and post-save hooks store original
+	var reset = function(doc) {
+		doc._original = doc.toObject({ transform: false });
+	};
+	schema.post('init', reset);
+	schema.post('save', reset);
+
+	// Expose virtual
+    schema.virtual(virtualName).get(function() {
+        // Return undefined if this object is brand new
         if (!this._original) {
-            this._original = {};
+            return;
         }
 
-        return jdp.diff(this._original, this.toObject({transform: false}));
+        // Otherwise return diff
+        return jdp.diff(this._original, this.toObject({ transform: false }));
     });
-
-	schema.post('save', function() {
-		this._original = this.toObject({transform: false});
-	});
 };
+
